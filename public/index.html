@@ -9,35 +9,51 @@
       name="description"
       content="Web site created using create-react-app"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <!-- <script src="https://g.alicdn.com/dingding/h5-dingtalk-login/0.21.0/ddlogin.js"></script> -->
+    <title>Easy English</title>
+    <style>
+      /* STEP2：指定这个包裹容器元素的CSS样式，尤其注意宽高的设置 */
+      /* .self-defined-classname {
+        width: 300px;
+        height: 300px;
+      } */
+    </style>
   </head>
+
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <!-- STEP1：在HTML中添加包裹容器元素 -->
+    <!-- <div id="self_defined_element" class="self-defined-classname"></div> -->
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    <!-- <script>
+      // STEP3：在需要的时候，调用 window.DTFrameLogin 方法构造登录二维码，并处理登录成功或失败的回调。
+      window.DTFrameLogin(
+        {
+          id: "self_defined_element",
+          width: 300,
+          height: 300,
+        },
+        {
+          redirect_uri: encodeURIComponent("http://localhost:3001/login"),
+          client_id: "dingxxxxxxxxxxxx",
+          scope: "openid",
+          response_type: "code",
+          state: "xxxxxxxxx",
+          prompt: "consent",
+        },
+        (loginResult) => {
+          const { redirectUrl, authCode, state } = loginResult;
+          // 这里可以直接进行重定向
+          window.location.href = redirectUrl;
+          // 也可以在不跳转页面的情况下，使用code进行授权
+          console.log(authCode);
+        },
+        (errorMsg) => {
+          // 这里一般需要展示登录失败的具体原因
+          alert(`Login Error: ${errorMsg}`);
+        }
+      );
+    </script> -->
   </body>
 </html>
