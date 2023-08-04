@@ -9,6 +9,9 @@ export const registerAPI = (data) => request('user/register', 'POST', data);
 // 将用户名存入配置文件中
 export const createConfigAPI = (data) => request('config/add', 'POST', data);
 
+// 从有道词典获取单词信息
+export const getWordInfoFromYoudaoAPI = (data) => request('/youdao/jsonapi', 'POST', data);
+
 // 添加单词
 export const addWordAPI = (data) => request('word/add', 'POST', data);
 

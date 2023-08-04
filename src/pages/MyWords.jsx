@@ -11,6 +11,7 @@ import Cookies from "js-cookie";
 import "./MyWords.css";
 import WordDialog from "../components/WordDialog";
 import { getAllWordsAPI } from "../api/api";
+import { disableFlag } from "@testing-library/user-event/dist/utils";
 
 // 将图片转为base64编码
 const getBase64 = (img, callback) => {
@@ -31,41 +32,6 @@ const beforeUpload = (file) => {
   }
   return isJpgOrPng && isLt2M;
 };
-
-// 表格列
-const columns = [
-  {
-    title: "单词",
-    dataIndex: "word",
-    key: "word",
-    render: (text) => <a>{text}</a>,
-  },
-  {
-    title: "音标",
-    dataIndex: "soundmark",
-    key: "soundmark",
-  },
-  {
-    title: "释义",
-    dataIndex: "meaning",
-    key: "meaning",
-  },
-  {
-    title: "例子",
-    dataIndex: "example",
-    key: "example",
-  },
-  {
-    title: "备注",
-    dataIndex: "note",
-    key: "note",
-  },
-  {
-    title: "操作",
-    dataIndex: "operate",
-    key: "operate",
-  },
-];
 
 const MyWords = () => {
   const [loading, setLoading] = useState(false);
@@ -129,11 +95,47 @@ const MyWords = () => {
     setIsModalOpen(false);
   };
 
+  // 表格列
+  const columns = [
+    {
+      title: "单词",
+      dataIndex: "word",
+      key: "word",
+      render: (text) => <a>{text}</a>,
+    },
+    {
+      title: "音标",
+      dataIndex: "pronunciation",
+      key: "pronunciation",
+    },
+    {
+      title: "释义",
+      dataIndex: "explanation",
+      key: "explanation",
+    },
+    {
+      title: "例子",
+      dataIndex: "sentence",
+      key: "sentence",
+    },
+    {
+      title: "备注",
+      dataIndex: "note",
+      key: "note",
+    },
+    {
+      title: "操作",
+      dataIndex: "operate",
+      key: "operate",
+    },
+  ];
   const [wordsList, setWordsList] = useState([]); // 表格数据
-  // 获取该用户的所有单词
+  const [disableFlag, setDisableFlag] = useState(false); // 是否禁用遮住释义按钮
+  const [eyeHideFlag, setEyeHideFlag] = useState(true); // 遮住释义flag
   useEffect(() => {
+    // 获取该用户的所有单词
     getAllWordsAPI({ belonging: Cookies.get("userName") }).then((res) => {
-      if(res.code === 200){
+      if (res.code === 200) {
         // 将单词列表的数据转换为表格的数据: 添加key属性，其他字段不变
         const tempList = res.wordsList.map((item) => {
           return {
@@ -144,7 +146,45 @@ const MyWords = () => {
         setWordsList(tempList);
       }
     });
-  }, []);
+
+
+    // if(!wordsList.length){
+    //   // 将遮住释义按钮禁用
+    //   setdisableFlag(true);
+    // }
+  }, [wordsList]);
+
+  const refreshWordList = (data) => {
+    data.key = data.id;
+    setWordsList([...wordsList, data]);
+  }
+
+  // 遮住释义按钮点击事件
+  const eyeHideClick = () => {
+    if (eyeHideFlag) {
+      // 遮住释义
+      const temp = wordsList.map((item) => {
+        return {
+          ...item,
+          explanation: "******",
+        };
+      });
+      setWordsList(temp);
+    } else {
+      // 不遮住释义
+      getAllWordsAPI({ belonging: Cookies.get("userName") }).then((res) => {
+        if (res.code === 200) {
+          const tempList = res.wordsList.map((item) => ({
+            key: item.id,
+            ...item,
+          }));
+          setWordsList(tempList);
+        }
+      });
+    }
+
+    setEyeHideFlag(!eyeHideFlag);
+  };
 
   return (
     <>
@@ -185,8 +225,13 @@ const MyWords = () => {
             删除选择
           </Button>
           {/* 【遮住释义】/【让我看看】 */}
-          <Button icon={<EyeInvisibleOutlined />} className="btn">
-            遮住释义
+          <Button
+            icon={eyeHideFlag ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+            className="btn"
+            onClick={eyeHideClick}
+            disabled={disableFlag}
+          >
+            {eyeHideFlag ? "遮住释义" : "让我看看"}
           </Button>
           {/* 添加单词 */}
           <Button
@@ -214,6 +259,7 @@ const MyWords = () => {
           isModalOpen={isModalOpen}
           handleOk={handleOk}
           handleCancel={handleCancel}
+          refreshWordList={refreshWordList}
         />
       </div>
     </>
