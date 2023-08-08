@@ -11,7 +11,7 @@ const Home = () => {
     <Layout style={{ minHeight: '100vh' }}>
       {/* 左边侧边栏 */}
       <Sider collapsible collapsed={collapsed} onCollapse={value => setCollapsed(value)}>
-        <div className="title" style={{color: 'pink', textAlign: 'center', fontSize: "26px", border:"2px solid pink", borderRadius: "5px"}}>单词轻松记</div>
+        {/* <div className="title" style={{color: '#1677ff', textAlign: 'center', fontSize: "26px", border:"2px solid #1677ff", borderRadius: "5px"}}>单词轻松记</div> */}
         <MainMenu></MainMenu>
       </Sider>
       {/* 右边内容 */}

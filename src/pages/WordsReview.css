@@ -1,7 +1,66 @@
 .words-review-ct {
   width: 70%;
-  height: 220px;
-  margin: 80px auto;
+  height: 260px;
+  margin: 40px auto;
   background-color: #fff;
-  
+}
+
+.words-review-top{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 60px;
+  line-height: 40px;
+  background-color:#1677ff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0 20px;
+  font-size: 20px;
+  font-weight: bolder;
+  letter-spacing: 2px;
+}
+.words-review-top-title{
+  color: #fff;
+  margin-left: 20px;
+}
+
+.words-review-middle{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 160px;
+  margin: 20px 20px;
+}
+.words-review-middle-item{
+  padding: 20px 20px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  height: 100%;
+  transition: box-shadow 0.3s; /* 添加过渡效果，使阴影变化更平滑 */
+}
+.words-review-middle-item:hover{
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 添加浅浅的阴影效果 */
+}
+.words-review-middle-item-title{
+  font-size: 16px;
+  color: #666;
+}
+.words-review-middle-type{
+  width: 200px;
+}
+.words-review-middle-count{
+  width: 400px;
+}
+.words-review-middle-order{
+  width: 200px;
+}
+.words-review-middle-order-check{
+  margin-top: 20px;
+}
+.random{
+  color: #1677ff;
+}
+
+.words-review-button{
+  margin: 80px;
+  text-align: center;
 }

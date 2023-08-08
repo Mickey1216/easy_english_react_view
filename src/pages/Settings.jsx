@@ -1,4 +1,4 @@
-import { Slider, Row, Col, InputNumber, Radio, Select, message } from "antd";
+import { Slider, InputNumber, Radio, Select, message } from "antd";
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import {
@@ -74,7 +74,11 @@ const Settings = () => {
     setCountValue(parseInt(Cookies.get("wordsConfigLimit")));
     setProType(parseInt(Cookies.get("wordsConfigPronunciation")));
     setTypeValue(parseInt(Cookies.get("wordsConfigShowType")));
-    console.log(typeof Cookies.get("wordsConfigLimit"), Cookies.get("wordsConfigPronunciation"), Cookies.get("wordsConfigShowType"));
+    console.log(
+      typeof Cookies.get("wordsConfigLimit"),
+      Cookies.get("wordsConfigPronunciation"),
+      Cookies.get("wordsConfigShowType")
+    );
   }, []);
 
   return (
@@ -82,27 +86,20 @@ const Settings = () => {
       <div className="settings-title">单词偏好配置</div>
       <div className="settings-count">
         <span className="settings-count-title">单词每页显示数量</span>
-        <Row>
-          <Col span={12}>
-            <Slider
-              min={1}
-              max={10}
-              onChange={countChange}
-              value={typeof countValue === "number" ? countValue : 0}
-            />
-          </Col>
-          <Col span={4}>
-            <InputNumber
-              min={1}
-              max={10}
-              style={{
-                margin: "0 180px",
-              }}
-              value={countValue}
-              onChange={countChange}
-            />
-          </Col>
-        </Row>
+        <Slider
+          className="settings-count-slider"
+          min={1}
+          max={10}
+          onChange={countChange}
+          value={typeof countValue === "number" ? countValue : 0}
+        />
+        <InputNumber
+          className="settings-count-input"
+          min={1}
+          max={10}
+          value={countValue}
+          onChange={countChange}
+        />
       </div>
       <div className="settings-pronunciation">
         <span className="settings-pronunciation-title">单词发音</span>
