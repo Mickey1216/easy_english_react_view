@@ -17,6 +17,12 @@ export const changeWordShowTypeAPI = (data) => request('/config/update/is_marked
 // 从有道词典获取单词信息
 export const getWordInfoFromYoudaoAPI = (data) => request('/youdao/jsonapi', 'POST', data);
 // 添加单词
-export const addWordAPI = (data) => request('word/add', 'POST', data);
+export const addWordAPI = (data) => request('word/addWord', 'POST', data);
 // 获取所有单词
-export const getAllWordsAPI = (data) => request('word/getAll', 'POST', data);
+export const getAllWordsAPI = (data) => request('word/getWordsList', 'POST', data);
+// 获取单词的总个数
+export const getWordsCountAPI = (data) => request('word/getWordsCount', 'POST', data);
+// 获取复习单词
+export const getReviewWordsAPI = (data) => request('word/getReviewWords', 'POST', data);
+// 获取复习单词的总个数
+export const getReviewWordsCountAPI = (data) => request('word/getReviewWordsCount', 'POST', data);

@@ -3,8 +3,8 @@ import { Input, Alert, message } from "antd";
 import { UserOutlined, KeyOutlined, MailOutlined } from "@ant-design/icons";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
-import { loginAPI, registerAPI, createConfigAPI } from "../api/api";
+import "./index.css";
+import { loginAPI, registerAPI, createConfigAPI } from "../../api/api";
 
 const Login = () => {
   const navigate = useNavigate(); // 路由跳转

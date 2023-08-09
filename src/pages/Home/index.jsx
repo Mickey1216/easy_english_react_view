@@ -1,7 +1,7 @@
 import { Layout } from 'antd';
 import React, { useState } from 'react';
 import { Outlet } from "react-router-dom";
-import MainMenu from "../components/MainMenu";
+import MainMenu from "../../components/MainMenu";
 const { Content, Footer, Sider } = Layout;
 
 const Home = () => {

@@ -8,10 +8,9 @@ import {
   LoadingOutlined,
 } from "@ant-design/icons";
 import Cookies from "js-cookie";
-import "./MyWords.css";
-import WordDialog from "../components/WordDialog";
-import { getAllWordsAPI } from "../api/api";
-import { disableFlag } from "@testing-library/user-event/dist/utils";
+import "./index.css";
+import WordDialog from "../../components/WordDialog";
+import { getAllWordsAPI } from "../../api/api";
 
 // 将图片转为base64编码
 const getBase64 = (img, callback) => {
@@ -135,9 +134,10 @@ const MyWords = () => {
   useEffect(() => {
     // 获取该用户的所有单词
     getAllWordsAPI({ belonging: Cookies.get("userName") }).then((res) => {
+      console.log(res);
       if (res.code === 200) {
         // 将单词列表的数据转换为表格的数据: 添加key属性，其他字段不变
-        const tempList = res.wordsList.map((item) => {
+        const tempList = res.data.map((item) => {
           return {
             key: item.id,
             ...item,

@@ -1,0 +1,109 @@
+.card-top {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  font-size: 36px;
+  margin-top: 30px;
+}
+
+.card-word,
+.card-mark {
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.card-word {
+  transform: translateX(14px);
+}
+
+.card-mark {
+  font-size: 28px;
+  transform: translate(60px, 4px);
+}
+
+.card-mark i {
+  color: rgb(104, 193, 189);
+  cursor: pointer;
+}
+
+.card-pron {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.card-sentence {
+  display: flex;
+  justify-content: center;
+}
+
+.card-btns {
+  margin: 40px auto;
+  width: 80%;
+  display: flex;
+}
+
+.card-change {
+  display: flex;
+  align-items: center;
+}
+
+.card-options {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-option {
+  width: 80%;
+  min-height: 50px;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  border: 1px solid rgb(220, 223, 230);
+  text-align: left;
+  margin: 10px 0;
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.card-option:hover {
+  background-color: rgb(236, 245, 255);
+  color: rgb(64, 158, 255);
+  border: 1px solid rgb(198, 226, 255);
+}
+
+.card-option-active {
+  background-color: rgb(236, 245, 255);
+  color: rgb(64, 158, 255);
+  border: 1px solid rgb(198, 226, 255);
+}
+
+.card-change {
+  display: flex;
+  justify-content: space-around;
+}
+
+.change-word {
+  min-height: 0;
+  min-width: 0;
+  font-size: 22px;
+}
+
+.card-option-done-wrong,
+.card-option-done-wrong:hover {
+  color: rgb(245, 108, 108);
+  background-color: rgb(254, 240, 240);
+  border: 1px solid rgb(251, 196, 196);
+}
+
+.card-option-done-right,
+.card-option-done-right:hover {
+  color: rgb(103, 194, 58);
+  background-color: rgb(240, 249, 235);
+  border: 1px solid rgb(194, 231, 176);
+}

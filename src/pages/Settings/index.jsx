@@ -5,8 +5,8 @@ import {
   changeWordNumAPI,
   changeWordPronunciationAPI,
   changeWordShowTypeAPI,
-} from "../api/api";
-import "./Settings.css";
+} from "../../api/api";
+import "./index.css";
 
 const Settings = () => {
   // 单词每页显示数量
@@ -74,11 +74,6 @@ const Settings = () => {
     setCountValue(parseInt(Cookies.get("wordsConfigLimit")));
     setProType(parseInt(Cookies.get("wordsConfigPronunciation")));
     setTypeValue(parseInt(Cookies.get("wordsConfigShowType")));
-    console.log(
-      typeof Cookies.get("wordsConfigLimit"),
-      Cookies.get("wordsConfigPronunciation"),
-      Cookies.get("wordsConfigShowType")
-    );
   }, []);
 
   return (
