@@ -24,5 +24,9 @@ export const getAllWordsAPI = (data) => request('word/getWordsList', 'POST', dat
 export const getWordsCountAPI = (data) => request('word/getWordsCount', 'POST', data);
 // 获取复习单词
 export const getReviewWordsAPI = (data) => request('word/getReviewWords', 'POST', data);
-// 获取复习单词的总个数
-export const getReviewWordsCountAPI = (data) => request('word/getReviewWordsCount', 'POST', data);
+// 删除单词
+export const deleteWordsAPI = (data) => request('word/deleteWords', 'POST', data);
+// 删除单个单词
+export const deleteWordAPI = (id) => request(`word/deleteWord/${id}`, 'DELETE');
+// 更新单词
+export const updateWordAPI = (id, data) => request(`word/updateWord/${id}`, 'PUT', data);

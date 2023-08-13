@@ -1,6 +1,5 @@
 .my-words-ct {
   margin: 20px 50px;
-  border: 1px solid red;
 }
 
 .profile {
@@ -16,5 +15,5 @@
 
 /* Table */
 .ant-table-container {
-  /* height: 400px; */
+  height: 450px;
 }

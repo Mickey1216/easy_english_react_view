@@ -4,6 +4,7 @@ import "./index.css";
 import { useMemo } from "react";
 
 const ReviewWordCard = (props) => {
+  console.log(props);
   // 【< prev】
   const prevBtnDisable = useMemo(() => {
     return !props.question.index;

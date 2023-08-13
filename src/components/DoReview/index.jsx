@@ -1,5 +1,5 @@
 // 复习页面
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, startTransition, useEffect } from "react";
 import { Button, Progress } from "antd";
 import Cookies from "js-cookie";
 import "./index.css";
@@ -26,40 +26,30 @@ const DoReview = (props) => {
   const [reviewReportShowing, setReviewReportShowing] = useState(false); // 是否显示复习报告
 
   // 给单词索引数组赋值
-  useMemo(() => {
-    let arr = [];
-    for (let i = 0; i < props.reviewWords.length; i++) {
-      arr.push(i);
+  useEffect(() => {
+    setCurrency(1);
+    setTotal(props.actualReviewWords.length);
+    let temp = [];
+    for (let i = 1; i <= total; i++) {
+      temp.push(i);
     }
-    setIndexArray(arr);
-  }, [props.reviewWords]);
+    setIndexArray(temp);
+  }, [])
 
   // 进度条的百分比
   const percentage = useMemo(() => {
     return (currency / total) * 100;
   }, [currency, total]);
 
-  // 计算按钮的type值：warning/success/danger
-  const btnType = useMemo(
-    (index) => {
-      // 当前单词
-      let question = props.reviewWords[index - 1];
-
-      if (question.done === -1) return "warning";
-
-      if (question.doneRes) return "success";
-      else return "danger";
-    },
-    [percentage]
-  );
-
   // 准确率进度条的百分比
   const calcAccuracy = useMemo(() => {
-    return (
-      (props.reviewWords.filter((item) => item.doneRes).length /
-        props.reviewWords.length) *
-      100
-    ).toFixed(2);
+    return parseInt(
+      (
+        (props.actualReviewWords.filter((item) => item.doneRes).length /
+          props.actualReviewWords.length) *
+        100
+      ).toFixed(2)
+    );
   });
 
   // 点击单词序列按钮，进行跳转
@@ -77,24 +67,24 @@ const DoReview = (props) => {
   // 获取上一个单词
   const prevQuestion = () => {
     if (currency > 1) setCurrency(currency - 1);
-  }
+  };
 
   // 获取下一个单词
   const nextQuestion = () => {
-    if (currency < props.reviewWords.length) setCurrency(currency + 1);
-  }
+    if (currency < props.actualReviewWords.length) setCurrency(currency + 1);
+  };
 
   // 判断单词是否已经复习过
   const questionDid = (done, doneRes) => {
-    let question = props.reviewWords[currency - 1];
+    let question = props.actualReviewWords[currency - 1];
     question.done = done;
     question.doneRes = doneRes;
 
-    if (currency < props.reviewWords.length) setCurrency(currency + 1);
-  }
+    if (currency < props.actualReviewWords.length) setCurrency(currency + 1);
+  };
 
   // 改变单词的标志
-  const wordMarkChange = (word, mark) =>{
+  const wordMarkChange = (word, mark) => {
     // request(`/words/mark`, "PATCH", {
     //   username: Cookies.get("userName"),
     //   token: Cookies.get("token"),
@@ -108,8 +98,7 @@ const DoReview = (props) => {
     //       type: "success",
     //       duration: 2000,
     //     });
-
-    //     this.reviewWords[this.currency - 1].mark = mark;
+    //     this.actualReviewWords[this.currency - 1].mark = mark;
     //   } else { // 失败
     //     ElNotification({
     //       title: "失败",
@@ -119,37 +108,37 @@ const DoReview = (props) => {
     //     });
     //   }
     // });
-  }
+  };
 
   // 【生成复习结果】- 点击事件
   const reviewReportClick = () => {
     if (reviewReportShowing) return;
 
-    props.reviewWords.forEach(item => {
+    props.actualReviewWords.forEach((item) => {
       item.reveal = true;
     });
     setReviewReportShowing(true);
-  }
+  };
 
   // 【返回】- 点击事件
   const returnReviewSettingClick = () => {
     setReviewReportShowing(false);
     props.returnReviewSettingEvent();
     // this.$emit("returnReviewSettingEvent");
-  }
+  };
 
   // 【再做一次】- 点击事件
   const doAgainClick = () => {
     setReviewReportShowing(false);
 
-    props.reviewWords.forEach(item => {
+    props.actualReviewWords.forEach((item) => {
       item.done = -1;
       item.doneRes = false;
       item.reveal = false;
     });
 
     setCurrency(1);
-  }
+  };
 
   return (
     <>
@@ -162,7 +151,11 @@ const DoReview = (props) => {
         <div className="review-report-left">
           {indexArray.map((item, index) => {
             return (
-              <Button type={btnType(index)} onClick={jumpToQuestion(index)}>
+              <Button
+                type="primary"
+                onClick={jumpToQuestion(index)}
+                key={index}
+              >
                 {index + 1}
               </Button>
             );
@@ -174,7 +167,7 @@ const DoReview = (props) => {
             <Progress
               percent={calcAccuracy}
               type="circle"
-              strokeColor={customColorsScores}
+              // strokeColor={customColorsScores}
             />
           </div>
           <div className="review-report-right-group-text">正确率</div>
@@ -182,8 +175,8 @@ const DoReview = (props) => {
       </div>
       {/* ReviewWordCard组件 */}
       <ReviewWordCard
-        reviewWordsLen={props.reviewWords.length}
-        question={props.reviewWords[currency - 1]}
+        reviewWordsLen={props.actualReviewWords.length}
+        question={props.actualReviewWords[currency - 1]}
         prevQuestionEvent={prevQuestion}
         nextQuestionEvent={nextQuestion}
         questionDid={questionDid}
@@ -192,7 +185,7 @@ const DoReview = (props) => {
       {/* 进度条 */}
       <Progress
         percent={percentage}
-        strokeColor={customColors}
+        // strokeColor={customColors}
         format={progress}
       />
       {/* 底部按钮 */}
@@ -204,7 +197,14 @@ const DoReview = (props) => {
           </div>
         ) : null}
         {/* 【生成复习结果】 */}
-        <div className={'review-bottom-btn' `${reviewReportShowing ? 'reviewBottomBtnDisabled' : ''}`} onClick={reviewReportClick}>
+        <div
+          className={`${
+            reviewReportShowing
+              ? "review-bottom-btn reviewBottomBtnDisabled"
+              : "review-bottom-btn"
+          }`}
+          onClick={reviewReportClick}
+        >
           生成复习结果
         </div>
         {/* 【再做一次】 */}

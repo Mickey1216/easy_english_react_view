@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Upload, message, Table } from "antd";
+import { Button, Upload, message, Table, Popconfirm, Avatar } from "antd";
 import {
   DeleteOutlined,
   EyeInvisibleOutlined,
@@ -10,7 +10,12 @@ import {
 import Cookies from "js-cookie";
 import "./index.css";
 import WordDialog from "../../components/WordDialog";
-import { getAllWordsAPI } from "../../api/api";
+import {
+  getAllWordsAPI,
+  deleteWordsAPI,
+  getWordsCountAPI,
+  deleteWordAPI
+} from "../../api/api";
 
 // 将图片转为base64编码
 const getBase64 = (img, callback) => {
@@ -35,6 +40,7 @@ const beforeUpload = (file) => {
 const MyWords = () => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(); // 头像的url
+  const avatarUploadURL = "http://localhost:3005/api/user/uploadAvatar"; // 头像上传的url
 
   // 头像上传的回调函数
   const handleChange = (info) => {
@@ -43,11 +49,13 @@ const MyWords = () => {
       return;
     }
     if (info.file.status === "done") {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, (url) => {
+      // 获取头像的url
+      getBase64(info.file.originFileObj, () => {
         setLoading(false);
-        setImageUrl(url);
       });
+      
+      localStorage.setItem("avatarUrl", info.file.response.fileUrl);
+      setImageUrl(info.file.response.fileUrl)
     }
   };
 
@@ -88,10 +96,12 @@ const MyWords = () => {
   // 对话框的确定按钮点击事件
   const handleOk = () => {
     setIsModalOpen(false);
+    setIsAdd(true);
   };
   // 对话框的取消按钮点击事件
   const handleCancel = () => {
     setIsModalOpen(false);
+    setIsAdd(true);
   };
 
   // 表格列
@@ -126,65 +136,163 @@ const MyWords = () => {
       title: "操作",
       dataIndex: "operate",
       key: "operate",
+      render: (text, record) => 
+        wordsList.length > 0 ? (
+          <div>
+            <Button onClick={editClick(record.key)}>编辑</Button>
+            <Popconfirm title="确定删除吗?" onConfirm={delClick(record.key)} okText="确定" cancelText="取消">
+              <Button>删除</Button>
+            </Popconfirm>
+          </div>
+        ) : null
     },
   ];
   const [wordsList, setWordsList] = useState([]); // 表格数据
-  const [disableFlag, setDisableFlag] = useState(false); // 是否禁用遮住释义按钮
+  const [disableFlag, setDisableFlag] = useState(false); // 是否禁用【选择多个】/【删除选择】/【遮住释义】按钮，默认不禁用
   const [eyeHideFlag, setEyeHideFlag] = useState(true); // 遮住释义flag
-  useEffect(() => {
-    // 获取该用户的所有单词
-    getAllWordsAPI({ belonging: Cookies.get("userName") }).then((res) => {
-      console.log(res);
+  const [checkedOpenFlag, setCheckedOpenFlag] = useState(false); // 是否打开【选择多个】按钮
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 选中的行的key
+  const onSelectChange = (newSelectedRowKeys) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  }); // 分页器
+  
+  const [fulfilledInfo, setFulfilledInfo] = useState({}); // 单词信息
+
+  // 获取单词总数
+  const fetchWordsCount = () => {
+    getWordsCountAPI({ belonging: Cookies.get("userName") }).then((res) => {
+      if (res.code === 200) {
+        setPagination({
+          ...pagination,
+          total: res.data,
+        });
+      }
+    });
+  };
+
+  // 获取该用户的所有单词
+  const fetchWordsList = () => {
+    getAllWordsAPI({
+      belonging: Cookies.get("userName"),
+      pagination: {
+        current: pagination.current,
+        pageSize: pagination.pageSize,
+      },
+    }).then((res) => {
       if (res.code === 200) {
         // 将单词列表的数据转换为表格的数据: 添加key属性，其他字段不变
         const tempList = res.data.map((item) => {
           return {
             key: item.id,
             ...item,
+            backup: item.explanation,
           };
         });
-        setWordsList(tempList);
+        // 更新单词列表
+        setWordsList((wordsList) => {
+          // 如果单词列表为空，则禁用这三个按钮
+          wordsList = tempList;
+          setDisableFlag(wordsList && wordsList.length === 0);
+
+          return wordsList;
+        });
       }
     });
+  };
 
+  useEffect(() => {
+    fetchWordsList();
+  }, [pagination.current, pagination.pageSize]);
 
-    // if(!wordsList.length){
-    //   // 将遮住释义按钮禁用
-    //   setdisableFlag(true);
-    // }
-  }, [wordsList]);
+  useEffect(() => {
+    fetchWordsCount();
+  }, [wordsList.length]);
 
-  const refreshWordList = (data) => {
-    data.key = data.id;
-    setWordsList([...wordsList, data]);
-  }
+  useEffect(() => {
+    localStorage.getItem("avatarUrl") && setImageUrl(localStorage.getItem("avatarUrl"));
+  }, [imageUrl]);
+
+  const refreshWordList = (data, type) => {
+    if (type === "add") {
+      data.key = data.id;
+      setWordsList([...wordsList, data]);
+    } else {
+      const newList = wordsList.map(item => {
+        if (item.id === data.id) {
+          item.explanation = data.explanation;
+          item.note = data.note;
+          item.pronunciation = data.pronunciation;
+          item.sentence = data.sentence;
+        }
+        return item;
+      })
+
+      setWordsList(newList);
+    }
+  };
 
   // 遮住释义按钮点击事件
   const eyeHideClick = () => {
-    if (eyeHideFlag) {
-      // 遮住释义
-      const temp = wordsList.map((item) => {
+    setEyeHideFlag(!eyeHideFlag);
+
+    setWordsList(
+      wordsList.map((item) => {
         return {
           ...item,
-          explanation: "******",
+          explanation: eyeHideFlag ? "******" : item.backup,
         };
-      });
-      setWordsList(temp);
-    } else {
-      // 不遮住释义
-      getAllWordsAPI({ belonging: Cookies.get("userName") }).then((res) => {
+      })
+    );
+  };
+
+  // 删除选择按钮点击事件
+  const deleteSelectedBtnClick = () => {
+    deleteWordsAPI({ ids: selectedRowKeys }).then((res) => {
+      if (res.code === 200) {
+        message.success("删除成功！");
+        // 重新获取单词列表
+        fetchWordsList();
+        setSelectedRowKeys([]);
+      }
+    });
+  };
+
+  // 表格变化
+  const onTableChange = (pagination) => {
+    setPagination(pagination);
+  };
+
+  // 编辑按钮点击事件
+  const editClick = (key) => {
+    return () => {
+      setFulfilledInfo(wordsList.find((item) => item.key === key));
+
+      setIsAdd(false);
+      setIsModalOpen(true);
+    };
+  }
+
+  // 删除按钮点击事件
+  const delClick = (key) => {
+    return () => {
+      deleteWordAPI(key).then((res) => {
         if (res.code === 200) {
-          const tempList = res.wordsList.map((item) => ({
-            key: item.id,
-            ...item,
-          }));
-          setWordsList(tempList);
+          message.success("删除成功！");
+          // 重新获取单词列表
+          fetchWordsList();
         }
       });
-    }
-
-    setEyeHideFlag(!eyeHideFlag);
-  };
+    };
+  }
 
   return (
     <>
@@ -195,16 +303,17 @@ const MyWords = () => {
           listType="picture-circle"
           className="avatar-uploader"
           showUploadList={false}
-          action="/api/user/upload/avatar"
+          action={avatarUploadURL}
           beforeUpload={beforeUpload}
           onChange={handleChange}
         >
           {imageUrl ? (
-            <img
+            <Avatar
               src={imageUrl}
               alt="avatar"
               style={{
                 width: "100%",
+                height: "100%",
               }}
             />
           ) : (
@@ -217,11 +326,24 @@ const MyWords = () => {
         {/* 顶部按钮组 */}
         <div className="top-button-group">
           {/* 【选择多个】/【取消选择】 */}
-          <Button type="primary" className="btn">
+          <Button
+            type="primary"
+            className="btn"
+            disabled={disableFlag}
+            onClick={() => {
+              setCheckedOpenFlag(!checkedOpenFlag);
+            }}
+          >
             选择多个
           </Button>
           {/* 【删除选择】 */}
-          <Button danger icon={<DeleteOutlined />} className="btn">
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            className="btn"
+            disabled={disableFlag || selectedRowKeys.length === 0}
+            onClick={deleteSelectedBtnClick}
+          >
             删除选择
           </Button>
           {/* 【遮住释义】/【让我看看】 */}
@@ -245,7 +367,20 @@ const MyWords = () => {
 
         {/* 单词列表 */}
         <div className="words-list">
-          <Table columns={columns} dataSource={wordsList} />
+          <Table
+            columns={columns}
+            dataSource={wordsList}
+            rowSelection={checkedOpenFlag ? rowSelection : null}
+            onChange={onTableChange}
+            pagination={{
+              ...pagination,
+              showSizeChanger: true,
+              showTotal: (total) => `共${total}条`,
+            }}
+            scroll={
+              {y: 400}
+            }
+          />
         </div>
 
         {/* 播放单词发音 */}
@@ -260,6 +395,7 @@ const MyWords = () => {
           handleOk={handleOk}
           handleCancel={handleCancel}
           refreshWordList={refreshWordList}
+          fulfilledInfo={fulfilledInfo}
         />
       </div>
     </>

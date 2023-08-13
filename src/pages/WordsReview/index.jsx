@@ -12,31 +12,22 @@ import {
   message,
   notification,
 } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
 import "./index.css";
-import { getReviewWordsAPI, getWordsCountAPI, getReviewWordsCountAPI } from "../../api/api";
+import { getReviewWordsAPI, getWordsCountAPI } from "../../api/api";
 import DoReview from "../../components/DoReview";
 
 const WordsReview = () => {
-  // 获取单词总个数
+  // 单词总数
   const [wordsCount, setWordsCount] = useState(0);
-  // 获取复习单词总个数
-  const [reviewWordsCount, setReviewWordsCount] = useState(0);
   useEffect(() => {
+    // 获取单词总数
     getWordsCountAPI({
       belonging: Cookies.get("userName"),
       token: Cookies.get("easy-english-react-token"),
     }).then((res) => {
       setWordsCount(res.data);
-    });
-
-    getReviewWordsCountAPI({
-      belonging: Cookies.get("userName"),
-      token: Cookies.get("easy-english-react-token"),
-      type: reviewType,
-    }).then((res) => {
-      setReviewWordsCount(res.data);
     });
   }, []);
 
@@ -65,6 +56,7 @@ const WordsReview = () => {
   };
   // 复习的单词
   const [reviewWords, setReviewWords] = useState([]);
+  const reviewWordsRef = useRef(reviewWords);
   // 实际复习单词
   const [actualReviewWords, setActualReviewWords] = useState([]);
 
@@ -81,9 +73,10 @@ const WordsReview = () => {
   const [stepNumber, setStepNumber] = useState(0);
 
   // 开始复习按钮回调函数
-  const startReview = () => {
+  const startReview = async () => {
     // 检查是否符合复习条件
     if (startBtnDisabled) return;
+
     if (wordsCount < 4) {
       message.error("单词本中单词数量不足4个，无法复习");
       return;
@@ -105,37 +98,36 @@ const WordsReview = () => {
     }
 
     // 请求获取复习单词接口
-    getReviewWordsAPI({
+    const res = await getReviewWordsAPI({
       belonging: Cookies.get("userName"),
       token: Cookies.get("easy-english-react-token"),
       type: reviewType,
       count: reviewCount,
       order: randomFlag ? "random" : "order",
-    }).then((res) => {
-      if (res.code === 200) {
-        console.log(res.data);
-        // 成功
-        setReviewWords([...res.data]);
-        setTimeout(() => {
-          console.log(reviewWords);
-        }, 1000);
-        setStepNumber(2);
-      } else {
-        // 失败
-        notification.error({
-          message: "失败",
-          description: "服务器出现问题",
-          duration: 1.5,
-        });
+    })
 
-        setStepNumber(0);
-        setStartBtnDisabled(false);
-      }
-    });
+    if (res.code === 200) {
+      setReviewWords((reviewWords) => {
+        reviewWords = res.data;
+        reviewWordsRef.current = reviewWords;
 
-    console.log(reviewWords.length);
+        return reviewWords;
+      });
+      setStepNumber(2);
+    } else {
+      notification.error({
+        message: "失败",
+        description: "服务器出现问题",
+        duration: 1.5,
+      });
+
+      setStepNumber(0);
+      setStartBtnDisabled(false);
+      return;
+    }
+    
     // 检查是否符合复习条件
-    if (!reviewWords.length || reviewWords.length < 4) {
+    if (!reviewWordsRef.current.length || reviewWordsRef.current.length < 4) {
       notification.error({
         message: "失败",
         description: "单词过少无法进行复习",
@@ -147,12 +139,13 @@ const WordsReview = () => {
       return;
     }
 
-    
     // 复习单词组装
-    let explanations = reviewWords.map((item) => item.explanation); // 组成解释集合
-    let wordsLen = reviewWords.length;
-    let index = 0;
-    reviewWords.forEach((res) => {
+    let explanations = reviewWordsRef.current.map((item) => item.explanation); // 组成解释集合
+    let wordsLen = reviewWordsRef.current.length;
+    let index = -1;
+    const tmpList = reviewWordsRef.current.map((res) => {
+      index++;
+
       let random_opts_index = []; // 用于存储抽取的随机单词下标
       while (true) {
         for (
@@ -174,26 +167,22 @@ const WordsReview = () => {
       random_opts_index.push(index);
       random_opts_index.sort(() => 0.5 - Math.random()); // 打乱4个下标位置
 
-      // 组装复习单词
-      setActualReviewWords((actualReviewWords) => [
-        ...actualReviewWords,
-        {
-          word: res.word,
-          mark: res.mark,
-          pronunciation: res.pronunciation,
-          sentence: res.sentence,
-          options: random_opts_index.map((item) => explanations[item]),
-          ans: random_opts_index.findIndex((item) => item === index),
-          index: index,
-          done: -1,
-          doneRes: false,
-          reveal: false,
-        },
-      ]);
-
-      index++;
+      return {
+        word: res.word,
+        mark: res.mark,
+        pronunciation: res.pronunciation,
+        sentence: res.sentence,
+        options: random_opts_index.map((item) => explanations[item]),
+        ans: random_opts_index.findIndex((item) => item === index),
+        index: index,
+        done: -1,
+        doneRes: false,
+        reveal: false
+      }
     });
 
+    // 给实际复习单词赋值
+    setActualReviewWords(tmpList);
     setStepNumber(3);
     setStepNumber(4);
     setShowingReviewProcess(true);
@@ -262,7 +251,7 @@ const WordsReview = () => {
           </div>
           <div className="words-review-middle-item words-review-middle-count">
             <span className="words-review-middle-item-title">
-              复习{reviewCount}个{reviewWords.length}
+              复习{reviewCount}个
             </span>
             <Slider
               value={reviewCount}
@@ -306,7 +295,7 @@ const WordsReview = () => {
       <div className="review-area">
         {showingReviewProcess ? (
           <DoReview
-            reviewWords={reviewWords}
+            actualReviewWords={actualReviewWords}
             returnReviewSettingEvent={returnReviewSetting}
           />
         ) : null}

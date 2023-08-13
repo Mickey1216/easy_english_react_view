@@ -1,8 +1,8 @@
 import { Modal, message } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import "./index.css";
-import { addWordAPI, getWordInfoFromYoudaoAPI } from "../../api/api";
+import { addWordAPI, getWordInfoFromYoudaoAPI, updateWordAPI } from "../../api/api";
 
 const WordDialog = (props) => {
   // 添加的单词
@@ -52,13 +52,33 @@ const WordDialog = (props) => {
   };
   // 模态框的确认和取消
   const okClick = () => {
-    // 将单词传给后端存储
-    addWordAPI(addWord).then((res) => {
-      // 通知父组件刷新单词列表
-      props.refreshWordList(res);
-      // 提示单词添加成功
-      message.success("单词添加成功");
-    });
+    if (props.isAdd) {
+      // 将单词传给后端存储
+      addWordAPI(addWord).then((res) => {
+        // 通知父组件刷新单词列表
+        props.refreshWordList(res, "add");
+        // 提示单词添加成功
+        message.success("单词添加成功");
+      });
+    } else {
+      if (addWord.pronunciation === props.fulfilledInfo.pronunciation &&
+        addWord.explanation === props.fulfilledInfo.explanation &&
+        addWord.sentence === props.fulfilledInfo.sentence &&
+        addWord.note === props.fulfilledInfo.note) {
+
+          props.handleOk();
+          return;
+        }
+      
+      // 将单词传给后端更新
+      updateWordAPI(props.fulfilledInfo.id, addWord).then((res) => {
+        addWord["id"] = props.fulfilledInfo.id
+        // 通知父组件刷新单词列表
+        props.refreshWordList(addWord, "update");
+        // 提示单词更新成功
+        message.success("单词更新成功");
+      });
+    }
 
     // 清空输入框
     setAddWord({
@@ -72,6 +92,18 @@ const WordDialog = (props) => {
     // 关闭模态框
     props.handleOk();
   };
+
+  useEffect(() => {
+    if (!props.isAdd) {
+      setAddWord({
+        pronunciation: props.fulfilledInfo.pronunciation,
+        explanation: props.fulfilledInfo.explanation,
+        sentence: props.fulfilledInfo.sentence,
+        note: props.fulfilledInfo.note,
+      });
+    }
+  }, [props.isAdd, props.fulfilledInfo]);
+
   const cancelClick = () => {
     props.handleCancel();
     // 清空输入框
@@ -96,7 +128,8 @@ const WordDialog = (props) => {
       setFetchFillFlag(true);
       // 从有道词典获取单词信息
       getWordInfoFromYoudaoAPI({ q: word }).then((res) => {
-        if (res.input === word && res.ec !== undefined) { // 单词填充成功
+        if (res.input === word && res.ec !== undefined) {
+          // 单词填充成功
           let word = res.ec.word[0];
           let row_word = "";
           let row_note = "";
@@ -136,15 +169,17 @@ const WordDialog = (props) => {
               explanation: row_word.trimLeft(),
             });
           }
-        } else { // 单词填充失败
+        } else {
+          // 单词填充失败
           message({
             type: "error",
             message: "单词填充失败（注意查看单词是否拼写正确）",
-          })
+          });
         }
       });
     }
   };
+  
 
   return (
     <div className="word-dialog">
@@ -159,28 +194,42 @@ const WordDialog = (props) => {
         <div className="word-input">
           <span>单词</span>
           <input
-            placeholder={props.isAdd ? "" : "单词"}
-            value={addWord.word}
+            value={props.isAdd ? addWord.word : props.fulfilledInfo.word}
             onChange={wordChange}
             onBlur={autoFillWord}
+            disabled={!props.isAdd}
           />
         </div>
         <div className="word-input">
           音标
           <input
-            value={addWord.pronunciation}
+            value={addWord.pronunciation
+            }
             onChange={pronunciationChange}
           />
         </div>
         <div className="word-input">
           释义
-          <input value={addWord.explanation} onChange={explanationChange} />
+          <input
+            value={addWord.explanation
+            }
+            onChange={explanationChange}
+          />
         </div>
         <div className="word-input">
-          例子 <input value={addWord.sentence} onChange={sentenceChange} />
+          例子{" "}
+          <input
+            value={addWord.sentence
+            }
+            onChange={sentenceChange}
+          />
         </div>
         <div className="word-input">
-          备注 <input value={addWord.note} onChange={noteChange} />
+          备注{" "}
+          <input
+            value={addWord.note}
+            onChange={noteChange}
+          />
         </div>
       </Modal>
     </div>
