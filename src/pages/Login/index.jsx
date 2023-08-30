@@ -62,6 +62,7 @@ const Login = () => {
 
     // 调用用户登录接口
     loginAPI({ userName, password }).then((res) => {
+      console.log(res, '111');
       if (res.res.code === 200) {
         message.success("登录成功！", 0.5, () => {
           // 清空登录表单
@@ -77,8 +78,8 @@ const Login = () => {
           // 路由跳转
           navigate("/mywords");
         });
-      } else if (res.res.code === 1002) {
-        message.error("密码错误！", 1);
+      } else if (res.code === 1002) {
+        message.error("密码错误！");
       }
     });
   };

@@ -50,7 +50,7 @@ const WordDialog = (props) => {
       note: e.target.value,
     });
   };
-  // 模态框的确认和取消
+  // 模态框的确认
   const okClick = () => {
     if (props.isAdd) {
       // 将单词传给后端存储
@@ -92,6 +92,26 @@ const WordDialog = (props) => {
     // 关闭模态框
     props.handleOk();
   };
+  // 模态框的取消
+  const cancelClick = () => {
+    props.handleCancel();
+    // 清空输入框
+    setAddWord({
+      word: "",
+      pronunciation: "",
+      explanation: "",
+      sentence: "",
+      note: "",
+    });
+  };
+
+  useEffect(() => {
+    setAddWord({
+      ...addWord,
+      mark: 0,
+      belonging: Cookies.get('userName')
+    })
+  }, [])
 
   useEffect(() => {
     if (!props.isAdd) {
@@ -104,17 +124,7 @@ const WordDialog = (props) => {
     }
   }, [props.isAdd, props.fulfilledInfo]);
 
-  const cancelClick = () => {
-    props.handleCancel();
-    // 清空输入框
-    setAddWord({
-      word: "",
-      pronunciation: "",
-      explanation: "",
-      sentence: "",
-      note: "",
-    });
-  };
+  
 
   // 单词框失去焦点后自动填充单词
   const [autoWord, setAutoWord] = useState("");

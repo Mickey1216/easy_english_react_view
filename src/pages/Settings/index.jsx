@@ -71,9 +71,20 @@ const Settings = () => {
   };
 
   useEffect(() => {
-    setCountValue(parseInt(Cookies.get("wordsConfigLimit")));
-    setProType(parseInt(Cookies.get("wordsConfigPronunciation")));
-    setTypeValue(parseInt(Cookies.get("wordsConfigShowType")));
+    setCountValue(() => {
+      if(Cookies.get("wordsConfigLimit") === undefined) return 1;
+      return parseInt(Cookies.get("wordsConfigLimit"));
+    });
+
+    setProType(() => { 
+      if(Cookies.get("wordsConfigPronunciation") === undefined) return 0;
+      return parseInt(Cookies.get("wordsConfigPronunciation"));
+    });
+
+    setTypeValue(() => {
+      if(Cookies.get("wordsConfigShowType") === undefined) return 2;
+      return parseInt(Cookies.get("wordsConfigShowType"));
+    });
   }, []);
 
   return (
@@ -106,7 +117,6 @@ const Settings = () => {
       <div className="settings-type">
         <span className="settings-type-title">单词类型</span>
         <Select
-          defaultValue={0}
           value={typeValue}
           style={{
             width: 120,
