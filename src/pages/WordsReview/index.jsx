@@ -27,6 +27,7 @@ const WordsReview = () => {
       belonging: Cookies.get("userName"),
       token: Cookies.get("easy-english-react-token"),
     }).then((res) => {
+      console.log(res);
       setWordsCount(res.data);
     });
   }, []);

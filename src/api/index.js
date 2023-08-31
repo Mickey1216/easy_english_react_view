@@ -1,5 +1,6 @@
 import axios from "axios";
 import qs from "qs";
+import Cookie from 'js-cookie';
 
 export default function request(target, method = "GET", data = {}) {
   const instance = axios.create({
@@ -20,7 +21,7 @@ export default function request(target, method = "GET", data = {}) {
       method === "PATCH"
         ? "application/x-www-form-urlencoded"
         : "application/json";
-    config.headers["Authorization"] = `Bearer `;
+    config.headers["Authorization"] = `Bearer ${Cookie.get('easy-english-react-token')}`;
     config.data = qs.stringify(data);
 
     return config;

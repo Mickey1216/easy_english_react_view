@@ -2,7 +2,11 @@ import { Modal, message } from "antd";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import "./index.css";
-import { addWordAPI, getWordInfoFromYoudaoAPI, updateWordAPI } from "../../api/api";
+import {
+  addWordAPI,
+  getWordInfoFromYoudaoAPI,
+  updateWordAPI,
+} from "../../api/api";
 
 const WordDialog = (props) => {
   // 添加的单词
@@ -52,7 +56,8 @@ const WordDialog = (props) => {
   };
   // 模态框的确认
   const okClick = () => {
-    if (props.isAdd) {
+    if (props.isAdd) { // 新增单词
+      console.log(addWord);
       // 将单词传给后端存储
       addWordAPI(addWord).then((res) => {
         // 通知父组件刷新单词列表
@@ -60,19 +65,20 @@ const WordDialog = (props) => {
         // 提示单词添加成功
         message.success("单词添加成功");
       });
-    } else {
-      if (addWord.pronunciation === props.fulfilledInfo.pronunciation &&
+    } else { // 修改单词
+      if (
+        addWord.pronunciation === props.fulfilledInfo.pronunciation &&
         addWord.explanation === props.fulfilledInfo.explanation &&
         addWord.sentence === props.fulfilledInfo.sentence &&
-        addWord.note === props.fulfilledInfo.note) {
+        addWord.note === props.fulfilledInfo.note
+      ) {
+        props.handleOk();
+        return;
+      }
 
-          props.handleOk();
-          return;
-        }
-      
       // 将单词传给后端更新
       updateWordAPI(props.fulfilledInfo.id, addWord).then((res) => {
-        addWord["id"] = props.fulfilledInfo.id
+        addWord["id"] = props.fulfilledInfo.id;
         // 通知父组件刷新单词列表
         props.refreshWordList(addWord, "update");
         // 提示单词更新成功
@@ -106,14 +112,6 @@ const WordDialog = (props) => {
   };
 
   useEffect(() => {
-    setAddWord({
-      ...addWord,
-      mark: 0,
-      belonging: Cookies.get('userName')
-    })
-  }, [])
-
-  useEffect(() => {
     if (!props.isAdd) {
       setAddWord({
         pronunciation: props.fulfilledInfo.pronunciation,
@@ -123,8 +121,6 @@ const WordDialog = (props) => {
       });
     }
   }, [props.isAdd, props.fulfilledInfo]);
-
-  
 
   // 单词框失去焦点后自动填充单词
   const [autoWord, setAutoWord] = useState("");
@@ -189,7 +185,6 @@ const WordDialog = (props) => {
       });
     }
   };
-  
 
   return (
     <div className="word-dialog">
@@ -211,35 +206,20 @@ const WordDialog = (props) => {
           />
         </div>
         <div className="word-input">
-          音标
-          <input
-            value={addWord.pronunciation
-            }
-            onChange={pronunciationChange}
-          />
+          <span>音标</span>
+          <input value={addWord.pronunciation} onChange={pronunciationChange} />
         </div>
         <div className="word-input">
-          释义
-          <input
-            value={addWord.explanation
-            }
-            onChange={explanationChange}
-          />
+          <span>释义</span>
+          <input value={addWord.explanation} onChange={explanationChange} />
         </div>
         <div className="word-input">
-          例子{" "}
-          <input
-            value={addWord.sentence
-            }
-            onChange={sentenceChange}
-          />
+          <span>例子</span>
+          <input value={addWord.sentence} onChange={sentenceChange} />
         </div>
         <div className="word-input">
-          备注{" "}
-          <input
-            value={addWord.note}
-            onChange={noteChange}
-          />
+          <span>备注</span>
+          <input value={addWord.note} onChange={noteChange} />
         </div>
       </Modal>
     </div>

@@ -14,7 +14,7 @@ import {
   getAllWordsAPI,
   deleteWordsAPI,
   getWordsCountAPI,
-  deleteWordAPI
+  deleteWordAPI,
 } from "../../api/api";
 
 // 将图片转为base64编码
@@ -41,6 +41,8 @@ const MyWords = () => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(); // 头像的url
   const avatarUploadURL = "http://localhost:3005/api/user/uploadAvatar"; // 头像上传的url
+  // 默认头像地址
+  const defaultUrl = "https://ts1.cn.mm.bing.net/th/id/R-C.35b0a27f015d26ebeb94e8ce991d353f?rik=AwTPnPvuRI87kQ&riu=http%3a%2f%2fpic.616pic.com%2fys_img%2f00%2f08%2f69%2fbW7OT55QAA.jpg&ehk=nnEa1R8Y15No3AwK5G%2f7Nm6%2b5oHBGLYKJArsfjl%2bqRc%3d&risl=&pid=ImgRaw&r=0&sres=1&sresct=1";
 
   // 头像上传的回调函数
   const handleChange = (info) => {
@@ -53,9 +55,12 @@ const MyWords = () => {
       getBase64(info.file.originFileObj, () => {
         setLoading(false);
       });
-      
-      localStorage.setItem("avatarUrl", info.file.response.fileUrl);
-      setImageUrl(info.file.response.fileUrl)
+
+      localStorage.setItem(
+        `${Cookies.get("userName")}_avatarUrl`,
+        info.file.response.fileUrl
+      );
+      setImageUrl(info.file.response.fileUrl);
     }
   };
 
@@ -136,15 +141,20 @@ const MyWords = () => {
       title: "操作",
       dataIndex: "operate",
       key: "operate",
-      render: (text, record) => 
+      render: (text, record) =>
         wordsList.length > 0 ? (
           <div>
             <Button onClick={editClick(record.key)}>编辑</Button>
-            <Popconfirm title="确定删除吗?" onConfirm={delClick(record.key)} okText="确定" cancelText="取消">
+            <Popconfirm
+              title="确定删除吗?"
+              onConfirm={delClick(record.key)}
+              okText="确定"
+              cancelText="取消"
+            >
               <Button>删除</Button>
             </Popconfirm>
           </div>
-        ) : null
+        ) : null,
     },
   ];
   const [wordsList, setWordsList] = useState([]); // 表格数据
@@ -164,7 +174,7 @@ const MyWords = () => {
     pageSize: 10,
     total: 0,
   }); // 分页器
-  
+
   const [fulfilledInfo, setFulfilledInfo] = useState({}); // 单词信息
 
   // 获取单词总数
@@ -217,8 +227,18 @@ const MyWords = () => {
     fetchWordsCount();
   }, [wordsList.length]);
 
-  useEffect(() => {
-    localStorage.getItem("avatarUrl") && setImageUrl(localStorage.getItem("avatarUrl"));
+  useEffect(() => { // 新用户第一次登录，展示默认头像；之前登录过的用户展示之前设置的头像
+    let currentUserName = '';
+    for(const key in localStorage){
+      if(key.includes('avatarUrl')){
+        currentUserName = key.split('_')[0];
+      }
+    }
+
+    if (Cookies.get("userName") === currentUserName)
+      setImageUrl(localStorage.getItem(`${Cookies.get("userName")}_avatarUrl`));
+    else
+      setImageUrl(defaultUrl);
   }, [imageUrl]);
 
   const refreshWordList = (data, type) => {
@@ -226,7 +246,7 @@ const MyWords = () => {
       data.key = data.id;
       setWordsList([...wordsList, data]);
     } else {
-      const newList = wordsList.map(item => {
+      const newList = wordsList.map((item) => {
         if (item.id === data.id) {
           item.explanation = data.explanation;
           item.note = data.note;
@@ -234,7 +254,7 @@ const MyWords = () => {
           item.sentence = data.sentence;
         }
         return item;
-      })
+      });
 
       setWordsList(newList);
     }
@@ -279,7 +299,7 @@ const MyWords = () => {
       setIsAdd(false);
       setIsModalOpen(true);
     };
-  }
+  };
 
   // 删除按钮点击事件
   const delClick = (key) => {
@@ -292,7 +312,7 @@ const MyWords = () => {
         }
       });
     };
-  }
+  };
 
   return (
     <>
@@ -377,9 +397,7 @@ const MyWords = () => {
               showSizeChanger: true,
               showTotal: (total) => `共${total}条`,
             }}
-            scroll={
-              {y: 400}
-            }
+            scroll={{ y: 400 }}
           />
         </div>
 

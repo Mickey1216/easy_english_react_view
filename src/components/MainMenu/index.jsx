@@ -42,6 +42,10 @@ const MainMenu = () => {
 
     if(e.key === '/logout') {
       Cookies.remove('easy-english-react-token');
+      Cookies.remove('wordsConfigPronunciation');
+      Cookies.remove('wordsConfigLimit');
+      Cookies.remove('wordsConfigShowType');
+      Cookies.remove('userName');
       message.success('登出成功');
       navigateTo('/login');
     }
