@@ -14,8 +14,6 @@ export const changeWordPronunciationAPI = (data) => request('/config/update/pron
 // 修改单词显示类型
 export const changeWordShowTypeAPI = (data) => request('/config/update/is_marked_only', 'PATCH', data);
 
-// 从有道词典获取单词信息
-export const getWordInfoFromYoudaoAPI = (data) => request('/youdao/jsonapi_s', 'POST', data);
 // 添加单词
 export const addWordAPI = (data) => request('word/addWord', 'POST', data);
 // 获取所有单词

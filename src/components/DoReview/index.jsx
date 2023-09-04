@@ -2,8 +2,8 @@
 import React, { useState, useMemo, startTransition, useEffect } from "react";
 import { Button, Progress } from "antd";
 import Cookies from "js-cookie";
-import "./index.css";
 import ReviewWordCard from "../ReviewWordCard";
+import "./index.css";
 
 const DoReview = (props) => {
   const [currency, setCurrency] = useState(-1); // 当前单词索引
@@ -27,6 +27,7 @@ const DoReview = (props) => {
 
   // 给单词索引数组赋值
   useEffect(() => {
+    console.log(props.actualReviewWords);
     setCurrency(1);
     setTotal(props.actualReviewWords.length);
     let temp = [];
@@ -87,7 +88,6 @@ const DoReview = (props) => {
   const wordMarkChange = (word, mark) => {
     // request(`/words/mark`, "PATCH", {
     //   username: Cookies.get("userName"),
-    //   token: Cookies.get("token"),
     //   word,
     //   mark
     // }).then(res => {

@@ -14,9 +14,9 @@ import {
 } from "antd";
 import { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
-import "./index.css";
 import { getReviewWordsAPI, getWordsCountAPI } from "../../api/api";
 import DoReview from "../../components/DoReview";
+import "./index.css";
 
 const WordsReview = () => {
   // 单词总数
@@ -25,9 +25,7 @@ const WordsReview = () => {
     // 获取单词总数
     getWordsCountAPI({
       belonging: Cookies.get("userName"),
-      token: Cookies.get("easy-english-react-token"),
     }).then((res) => {
-      console.log(res);
       setWordsCount(res.data);
     });
   }, []);
@@ -101,12 +99,10 @@ const WordsReview = () => {
     // 请求获取复习单词接口
     const res = await getReviewWordsAPI({
       belonging: Cookies.get("userName"),
-      token: Cookies.get("easy-english-react-token"),
       type: reviewType,
       count: reviewCount,
       order: randomFlag ? "random" : "order",
     })
-
     if (res.code === 200) {
       setReviewWords((reviewWords) => {
         reviewWords = res.data;
@@ -129,6 +125,7 @@ const WordsReview = () => {
     
     // 检查是否符合复习条件
     if (!reviewWordsRef.current.length || reviewWordsRef.current.length < 4) {
+      console.log(reviewWordsRef.current);
       notification.error({
         message: "失败",
         description: "单词过少无法进行复习",
@@ -183,6 +180,7 @@ const WordsReview = () => {
     });
 
     // 给实际复习单词赋值
+    console.log('11', tmpList);
     setActualReviewWords(tmpList);
     setStepNumber(3);
     setStepNumber(4);

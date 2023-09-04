@@ -1,7 +1,7 @@
+import { useMemo } from "react";
 import { StarOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import "./index.css";
-import { useMemo } from "react";
 
 const ReviewWordCard = (props) => {
   console.log(props);

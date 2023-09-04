@@ -5,7 +5,7 @@ import Cookie from 'js-cookie';
 export default function request(target, method = "GET", data = {}) {
   const instance = axios.create({
     // 基础路径，发请求的时候，路径当中会出现api
-    baseURL: target.startsWith("/youdao") ? "" : "http://localhost:3005/api/",
+    baseURL: "http://localhost:3005/api/",
     // 代表请求超时的时间5s
     timeout: 5000
   });
